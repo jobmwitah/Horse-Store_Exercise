@@ -1,0 +1,65 @@
+#define function setNumber(uint256) nonpayable returns()
+#define function increment() nonpayable returns()
+#define function number() nonpayable returns(uint256)
+
+#define constant NUMBER_SLOT = FREE_STORAGE_POINTER()
+
+#define macro CONSTRUCTOR() = takes(0) returns(0) {
+    // Initialize number to 0
+    0x00    // 0
+    0x00    // number storage slot
+    sstore  // store 0 at slot 0
+}
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xE0 shr
+
+    dup1 __FUNC_SIG(setNumber) eq setNumber_jump jumpi
+    dup1 __FUNC_SIG(increment) eq increment_jump jumpi
+    dup1 __FUNC_SIG(number) eq number_jump jumpi
+
+    setNumber_jump:
+        SET_NUMBER()
+
+    increment_jump:
+        INCREMENT()
+
+    number_jump:
+        NUMBER()
+}
+
+#define macro SET_NUMBER() = takes(0) returns(0) {
+     // Get newNumber from calldata (first parameter after function selector)
+    0x04    // calldata offset
+    calldataload
+    0x00    // number storage slot
+    sstore  // store newNumber at slot 0
+    stop
+}
+
+#define macro INCREMENT() = takes(0) returns(0) {
+     // Load number from storage
+    0x00    // number storage slot
+    sload
+    0x01    // 1
+    add     // number + 1
+    0x00    // number storage slot
+    sstore  // store incremented value
+    stop
+}
+
+#define macro NUMBER() = takes(0) returns(0) {
+    // Load number from storage
+    0x00    // number storage slot
+    sload
+    // Return it
+    0x00    // memory slot
+    mstore  // store number in memory
+
+    0x20    // length
+    0x00    // offset
+    return  // return 32 bytes from memory
+}
+
+
+
